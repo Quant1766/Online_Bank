@@ -1,5 +1,6 @@
 
 """main app"""
+
 from flask import Flask, request, jsonify
 from models import *
 import uuid
@@ -15,11 +16,7 @@ MINIMUM_TRANSFER = 1.00
  # valid transaction types
 TRANSACTION_TYPES = ['authorization', 'presentment', 'load']
 
-@app.cli.command()
-def initdb():
-    """Initialize the database."""
-    click.echo('Init the db')
-
+# helper and utility functions
 @app.before_request
 def before_request():
     init_db()
@@ -28,108 +25,6 @@ def before_request():
 def after_request(response):
     close_db()
     return response
-
-@app.route('/')
-def root():
-    return "Go to: /api/accounts"
-
-@app.route('/api/accounts/<int:account_id>')
-@app.route('/api/accounts')
-def api_get_accounts(account_id=None):
-    data = None
-    try:
-        if account_id:
-            data = Accounts.get(Accounts.id == account_id).to_dict()
-        else:
-            accounts = Accounts.select()
-            data = [account.to_dict() for account in accounts]
-    except Exception as error:
-        return "error: {}".format(error), 401
-
-    return jsonify(data)
-
-@app.route('/api/accounts', methods=['POST'])
-def api_post_account():
-    try:
-        req = request.get_json()
-        res = Accounts.create(
-            name=req['name'],
-            ledgerBalance=req['ledgerBalance'],
-            availableBalance=req['availableBalance']
-        )
-
-    except Exception as error:
-        return "error: {}".format(error), 401
-    return "success"
-
-@app.route('/api/load/<int:account_id>', methods=['PATCH'])
-def api_load_money(account_id):
-    """Load money to account."""
-    try:
-        req = request.get_json()
-        account = Accounts.get(Accounts.id == account_id)
-        account.availableBalance += round(req['amount'], 2)
-        account.ledgerBalance += round(req['amount'], 2)
-        account.save()
-        # insert transaction and transfer rows for the load amount
-        # transaction type is 'load'
-        transactionID = str(uuid.uuid1())
-        res = Transactions.create(
-            transactionID=transactionID,
-            senderID=account_id,
-            receiverID=account_id,
-            amount=round(req['amount'], 2),
-            transactionType=TRANSACTION_TYPES[2]
-        )
-        res = Transfer.create(
-            account=account_id,
-            transactionID=transactionID,
-            amount=round(req["amount"], 2),
-            presented=True
-        )
-    except Exception as error:
-        return "error: {}".format(error), 401
-    return "success"
-
-@app.route('/api/transactions/<int:transaction_id>')
-@app.route('/api/transactions')
-def api_get_transactions(transaction_id=None):
-    data = None
-    try:
-        if transaction_id:
-            data = Transactions.get(Transactions.id == transaction_id).to_dict()
-        else:
-            transactions = Transactions.select()
-            data = [transaction.to_dict() for transaction in transactions]
-    except Exception as error:
-        return "error: {}".format(error), 401
-
-    return jsonify(data)
-
-@app.route('/api/transfers/<int:transfer_id>')
-@app.route('/api/transfers')
-def api_get_transfers(transfer_id=None):
-    data = None
-    try:
-        if transfer_id:
-            data = Transfer.get(Transfer.id == transfer_id).to_dict()
-        else:
-            transfers = Transfer.select()
-            data = [transfer.to_dict() for transfer in transfers]
-    except Exception as error:
-        return "error: {}".format(error), 401
-
-    return jsonify(data)
-
-@app.route('/api/transfers/account/<int:account_id>')
-def api_get_account_transfers(account_id):
-    data = None
-    try:
-        data = Transfer.get(Transfer.account == account_id).to_dict()
-    except Exception as error:
-        return "error: {}".format(error), 401
-
-    return jsonify(data)
 
 def transaction_check(req, sender, receiver):
     """Transaction validity check."""
@@ -182,6 +77,124 @@ def insert_transfer(req, sender, receiver):
     ]
     with db.atomic():
         Transfer.insert_many(data).execute()
+
+# root
+@app.route('/')
+def root():
+    return "Go to: /api/accounts"
+
+# API routes
+@app.route('/api/accounts/<int:account_id>')
+@app.route('/api/accounts')
+def api_get_accounts(account_id=None):
+    data = None
+    try:
+        if account_id:
+            data = Accounts.get(Accounts.id == account_id).to_dict()
+        else:
+            accounts = Accounts.select()
+            data = [account.to_dict() for account in accounts]
+    except Exception as error:
+        return "error: {}".format(error), 401
+
+    return jsonify(data)
+
+@app.route('/api/accounts', methods=['POST'])
+def api_post_account():
+    try:
+        req = request.get_json()
+        res = Accounts.create(
+            name=req['name']
+        )
+
+    except Exception as error:
+        return "error: {}".format(error), 401
+    return "Successfully created a new account. ID: {}, Name: {}".format(res.id, res.name)
+
+@app.route('/api/load/<int:account_id>', methods=['PATCH'])
+def api_load_money(account_id):
+    """Load money to account."""
+    try:
+        req = request.get_json()
+        account = Accounts.get(Accounts.id == account_id)
+        account.availableBalance += round(req['amount'], 2)
+        account.ledgerBalance += round(req['amount'], 2)
+        account.save()
+        # insert transaction and transfer rows for the load amount
+        # transaction type is 'load'
+        transactionID = str(uuid.uuid1())
+        res = Transactions.create(
+            transactionID=transactionID,
+            senderID=account_id,
+            receiverID=account_id,
+            amount=round(req['amount'], 2),
+            transactionType=TRANSACTION_TYPES[2]
+        )
+        res = Transfer.create(
+            account=account_id,
+            transactionID=transactionID,
+            amount=round(req["amount"], 2),
+            presented=True
+        )
+    except Exception as error:
+        return "error: {}".format(error), 401
+    return "Successfully loaded {} € to account id: {}".format(req['amount'], account_id)
+
+@app.route('/api/transactions/<int:transaction_id>')
+@app.route('/api/transactions')
+def api_get_transactions(transaction_id=None):
+    data = None
+    try:
+        if transaction_id:
+            data = Transactions.get(Transactions.id == transaction_id).to_dict()
+        else:
+            transactions = Transactions.select()
+            data = [transaction.to_dict() for transaction in transactions]
+    except Exception as error:
+        return "error: {}".format(error), 401
+
+    return jsonify(data)
+
+@app.route('/api/transfers/<int:transfer_id>')
+@app.route('/api/transfers')
+def api_get_transfers(transfer_id=None):
+    data = None
+    try:
+        if transfer_id:
+            data = Transfer.get(Transfer.id == transfer_id).to_dict()
+        else:
+            transfers = Transfer.select()
+            data = [transfer.to_dict() for transfer in transfers]
+    except Exception as error:
+        return "error: {}".format(error), 401
+
+    return jsonify(data)
+
+@app.route('/api/transfers/account/<int:account_id>')
+def api_get_account_transfers(account_id):
+    data = None
+    ledger_balance = 0
+    available_balance = 0
+    account = Accounts.get(Accounts.id == account_id)
+    try:
+        data = [transfer.to_dict() for transfer in Transfer.select().where(Transfer.account == account_id)]
+        for item in data:
+            if item["presented"]:
+                ledger_balance += item["amount"]
+                available_balance += item["amount"]
+            else:
+                available_balance += item["amount"]
+
+    except Exception as error:
+        return "error: {}".format(error), 401
+
+    return jsonify({
+        'accountID': account_id,
+        'accountName': account.name,
+        'ledgerBalance': ledger_balance,
+        'availableBalance': available_balance,
+        'transfers': data
+    })
 
 
 @app.route('/api/transactions', methods=['POST'])

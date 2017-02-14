@@ -11,8 +11,8 @@ class BaseModel(Model):
 
 class Accounts(BaseModel):
     name = CharField(unique=True)
-    ledgerBalance = FloatField()
-    availableBalance = FloatField()
+    ledgerBalance = FloatField(default=0.0)
+    availableBalance = FloatField(default=0.0)
     
     def to_dict(self):
         return {
