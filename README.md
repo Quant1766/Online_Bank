@@ -2,6 +2,16 @@
 
 Python 3 Flask REST API web application (with peewee ORM + SQLite) to demonstrate some of the concepts of online banking.
 
+### Requirements
+
+* SQLite (included in Python 3)
+* Python 3
+* Flask
+* peewee
+
+```pip install peewee```
+```pip install Flask```
+
 ### API
 
 | Route                               | Method | Purpose                                                    |
