@@ -68,7 +68,7 @@ Example data to send as PATCH method to the API:
 ```
 
 ### Transfer
-In this route: ```/api/transfers/account/<account_id>``` you can see dynamically calculated ledger and available balance. Ledger balance is the real balance of the account. Available balance is a balance that have transactions what are not yet presented (reserved).
+In this route: ```/api/transfers/account/<account_id>``` you can see dynamically calculated ledger and available balance. Ledger balance is the real balance of the account. Available balance is a balance that have transactions that are not yet presented (they are reserved from your account but no yet charged).
 
 
 Example how will the data look:
