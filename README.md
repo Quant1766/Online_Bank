@@ -9,8 +9,10 @@ Python 3 Flask REST API web application (with peewee ORM + SQLite) to demonstrat
 * Flask
 * peewee
 
-```pip install peewee```
-```pip install Flask```
+```
+pip install peewee
+pip install Flask
+```
 
 ### API
 
