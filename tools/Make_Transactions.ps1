@@ -23,4 +23,4 @@ function Invoke-Transaction {
     Invoke-RestMethod -Uri $transactionURL -Method Post -Body $body -ContentType $ct
 }
 
-Invoke-Transaction -TransactionType presentment -TransactionID xyz123 -Amount 10.0
+Invoke-Transaction -TransactionType presentment -TransactionID abc123 -Amount 1.0 -SenderID 1 -ReceiverID 2

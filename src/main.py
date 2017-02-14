@@ -180,8 +180,8 @@ def api_get_account_transfers(account_id):
         data = [transfer.to_dict() for transfer in Transfer.select().where(Transfer.account == account_id)]
         for item in data:
             if item['presented']:
-                ledger_balance += item['amount']
-            available_balance += item['amount']
+                ledger_balance += round(item['amount'], 2)
+            available_balance += round(item['amount'], 2)
 
     except Exception as error:
         return "error: {}".format(error), 401
@@ -189,8 +189,8 @@ def api_get_account_transfers(account_id):
     return jsonify({
         'accountID': account_id,
         'accountName': account.name,
-        'ledgerBalance': ledger_balance,
-        'availableBalance': available_balance,
+        'ledgerBalance': round(ledger_balance, 2),
+        'availableBalance': round(available_balance, 2),
         'transfers': data
     })
 
@@ -217,16 +217,16 @@ def api_transactions():
 
             # if transaction type is authorization add entries to transfer table and subtract sender availableBalance
             if req['transactionType'] == TRANSACTION_TYPES[0]:
-                sender.availableBalance -= req['amount']
+                sender.availableBalance -= round(req['amount'], 2)
                 sender.save()
                 insert_transfer(req, sender, receiver)
             else:
                 # for presentment transaction update ledgerBalances for sender, receiver and bank accounts and update presentment = True for transfer
                 for transfer in Transfer.select().where(Transfer.transactionID == req['transactionID']):
                     account = Accounts.get(Accounts.id == transfer.account.id)
-                    account.ledgerBalance += transfer.amount
+                    account.ledgerBalance += round(transfer.amount, 2)
                     if account.id != sender.id:
-                        account.availableBalance += transfer.amount
+                        account.availableBalance += round(transfer.amount, 2)
                     account.save()
                     transfer.presented = True
                     transfer.save()
