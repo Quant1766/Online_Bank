@@ -30,6 +30,7 @@ Python 3 Flask REST API web application (with peewee ORM + SQLite) to demonstrat
 To make a new transaction you must fist send JSON data to route /api/transactions with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account.
 
 Example data:
+```
 {
 	'senderID': 1,
 	'receiverID': 2,
@@ -37,3 +38,4 @@ Example data:
 	'transactionType': 'authorization',
 	'transactionID': '1234ZORRO'
 }
+```
