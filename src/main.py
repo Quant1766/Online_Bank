@@ -33,12 +33,11 @@ def transaction_check(req, sender, receiver):
         try:
             auth_transaction = Transactions.get(Transactions.transactionID == req['transactionID'])
             if auth_transaction.transactionID != req['transactionID']:
-                print("2 hello: {}".format(auth_transaction.transactionID))
                 return False
         except Exception:
             return False
     # check that the sender and receiver and the sent amount are valid.
-    # Amount must be more than 0 and less than the available balance of the account
+    # Amount must be more than 1.0 and less than the available balance of the account
     if sender.id == req['senderID'] and\
     receiver.id == req['receiverID'] and\
     float(req['amount']) >= MINIMUM_TRANSFER and\
@@ -49,6 +48,7 @@ def transaction_check(req, sender, receiver):
 
 def insert_transfer(req, sender, receiver):
     """Insert non-presented entries to Transfer table, including bank fee entry.
+        presented value is not needed because the default value is set to 0.
         Transfer model (account_id + transactionID = unique constraint):
             account_id,
             transactionID,
@@ -131,7 +131,7 @@ def api_load_money(account_id):
         res = Transfer.create(
             account=account_id,
             transactionID=transactionID,
-            amount=round(req["amount"], 2),
+            amount=round(req['amount'], 2),
             presented=True
         )
     except Exception as error:
@@ -179,11 +179,9 @@ def api_get_account_transfers(account_id):
     try:
         data = [transfer.to_dict() for transfer in Transfer.select().where(Transfer.account == account_id)]
         for item in data:
-            if item["presented"]:
-                ledger_balance += item["amount"]
-                available_balance += item["amount"]
-            else:
-                available_balance += item["amount"]
+            if item['presented']:
+                ledger_balance += item['amount']
+            available_balance += item['amount']
 
     except Exception as error:
         return "error: {}".format(error), 401
@@ -217,7 +215,7 @@ def api_transactions():
                 transactionType=req['transactionType']
             )
 
-            # if transaction type is authorization add entries to transfer table and subtrack sender availableBalance
+            # if transaction type is authorization add entries to transfer table and subtract sender availableBalance
             if req['transactionType'] == TRANSACTION_TYPES[0]:
                 sender.availableBalance -= req['amount']
                 sender.save()
