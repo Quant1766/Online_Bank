@@ -26,6 +26,8 @@ You first must make two accounts and third account is the bank itself (account i
 
 Minimum transfer amount is 1 €
 
+This application doesn't have currency implemented. Funds are just floats.
+
 ### Functionalities
 
 * Create new account, POST request /api/accounts
