@@ -34,7 +34,7 @@ You first must make two accounts and third account is the bank itself (account i
 * Post new transactions (types: authorization, presentment, load)
 
 ### Transactions
-To make a new transaction you must first send JSON data to route ```/api/transactions``` with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account.
+To make a new transaction you must first send JSON data to route: ```/api/transactions``` with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account.
 
 Example data:
 ```
@@ -44,5 +44,13 @@ Example data:
 	'amount': 10.00,
 	'transactionType': 'authorization',
 	'transactionID': '1234ZORRO'
+}
+```
+### Load money
+You can load money to accounts with route: ```/api/load/<account_id>``` where account_id is your desired account id integer.
+Example data to send as PATCH method to the API:
+```
+{
+	'amount': 10.00
 }
 ```
