@@ -21,6 +21,11 @@ http://127.0.0.1:5000/
 http://127.0.0.1:5000/api/accounts
 ```
 
+### Database
+There is no need to install any database or create any tables for this application because it uses SQLite database that is included in Python 3.
+SQLite database is basically just one flat file 'mydb.db' in the directory.
+SQLite also doesn't have any authentication built-in. When you first start the development server, init_db() function automatically creates tables that are needed.
+
 ### API
 
 | Route                               | Method | Purpose                                                    |
