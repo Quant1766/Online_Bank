@@ -55,7 +55,7 @@ This application doesn't have currency implemented. Funds are just floats.
 ### Functionalities
 
 * Create new account, POST request /api/accounts
-* Get accounts/account with account id
+* Get all accounts or single account with account id
 * Load money via /api/load/[account_id] route
 * Get all transfers, single transfer, all transfers for user
 * Get all transactions, single transaction
@@ -83,7 +83,7 @@ Example data to send as PATCH method to the API:
 ### Transactions
 To make a new transaction you must first send JSON data to route: ```/api/transactions``` with transactionType ```authorization``` to reserve funds from the cardholders account.
 Both **authorization and presentment transactions must have the same transactionID**. TransactionID and transactionType construct together an unique constraint.
-SenderID and ReceiverID must exist at the database!
+SenderID and ReceiverID must exist in the database.
 Second transaction type to the same route must be ```presentment```. This actually deducts the funds from the account.
 **Notice that minimum transaction amount is 1 €.**
 
