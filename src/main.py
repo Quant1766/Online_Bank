@@ -9,7 +9,6 @@ app = Flask(__name__)
 
 # unique properties for the issuer
 BANK_FEE_PERCENT = 1
-BANK_NAME = 'Holvi'
 BANK_ID = 3
 MINIMUM_TRANSFER = 1.00
 
@@ -19,6 +18,7 @@ TRANSACTION_TYPES = ['authorization', 'presentment', 'load']
 # helper and utility functions
 @app.before_request
 def before_request():
+    # this function create tables at the database if they don't exist
     init_db()
 
 @app.after_request
@@ -30,7 +30,6 @@ def transaction_check(req, sender, receiver):
     """Transaction validity check."""
     # if transaction type is 'presentment' check that previous authorization transaction can be found
     if req['transactionType'] == TRANSACTION_TYPES[1]:
-        
         try:
             auth_transaction = Transactions.get(Transactions.transactionID == req['transactionID'])
             if auth_transaction.transactionID != req['transactionID']:
@@ -38,7 +37,8 @@ def transaction_check(req, sender, receiver):
                 return False
         except Exception:
             return False
-    # check that the sender and receiver and the sent amount is valid (more than 0 and less than available balance)
+    # check that the sender and receiver and the sent amount are valid.
+    # Amount must be more than 0 and less than the available balance of the account
     if sender.id == req['senderID'] and\
     receiver.id == req['receiverID'] and\
     float(req['amount']) >= MINIMUM_TRANSFER and\
@@ -55,24 +55,22 @@ def insert_transfer(req, sender, receiver):
             amount,
             presented
     """
-
     fee_amount = round(BANK_FEE_PERCENT * req['amount'] / 100.00, 2)
-    #presented = 1 if req['transactionType'] == TRANSACTION_TYPES[1] else 0
     data = [
         {
-            "account": sender.id,
-            "transactionID": req['transactionID'],
-            "amount": round(-req['amount'], 2)
+            'account': sender.id,
+            'transactionID': req['transactionID'],
+            'amount': round(-req['amount'], 2)
         },
         {
-            "account": receiver.id,
-            "transactionID": req['transactionID'],
-            "amount": round(req['amount']-fee_amount, 2)
+            'account': receiver.id,
+            'transactionID': req['transactionID'],
+            'amount': round(req['amount']-fee_amount, 2)
         },
         {
-            "account": BANK_ID,
-            "transactionID": req['transactionID'],
-            "amount": fee_amount
+            'account': BANK_ID,
+            'transactionID': req['transactionID'],
+            'amount': fee_amount
         }
     ]
     with db.atomic():
@@ -158,6 +156,7 @@ def api_get_transactions(transaction_id=None):
 @app.route('/api/transfers/<int:transfer_id>')
 @app.route('/api/transfers')
 def api_get_transfers(transfer_id=None):
+    """Get all transfers."""
     data = None
     try:
         if transfer_id:
@@ -172,6 +171,7 @@ def api_get_transfers(transfer_id=None):
 
 @app.route('/api/transfers/account/<int:account_id>')
 def api_get_account_transfers(account_id):
+    """Dynamically calculate account balances from the transfer table."""
     data = None
     ledger_balance = 0
     available_balance = 0
@@ -199,7 +199,7 @@ def api_get_account_transfers(account_id):
 
 @app.route('/api/transactions', methods=['POST'])
 def api_transactions():
-    """Transaction API to send funds between accounts."""
+    """Transaction API to send funds between two existing accounts."""
     try:
         req = request.get_json()
         # get sender and receiver from the database
