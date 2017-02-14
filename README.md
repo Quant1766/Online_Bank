@@ -22,6 +22,8 @@ This application only accepts transactions between two accounts that exist in th
 
 Bank takes 1 % fee for all transactions from the sender. So if sender (account 1) sends 10 € to account 2, bank takes 1 % of 10 € from the transfer amount and the account 2 only gets 9.9 € and the bank gets 0.1 €. Bank fee is defined as a global variable.
 
+You first must make two accounts and third account is the bank itself (account id 3)! You can change this bank id from the global variable.
+
 ### Functionalities
 
 * Create new account, POST request /api/accounts
