@@ -27,7 +27,7 @@ Python 3 Flask REST API web application (with peewee ORM + SQLite) to demonstrat
 * Post new transactions (types: authorization, presentment, load)
 
 ### Transactions
-To make a new transaction you must fist send JSON data to route /api/transactions with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account.
+To make a new transaction you must first send JSON data to route ```/api/transactions``` with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account.
 
 Example data:
 ```
