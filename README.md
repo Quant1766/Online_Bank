@@ -14,6 +14,13 @@ pip install peewee
 pip install Flask
 ```
 
+### Starting the server
+Flask comes with development server so you can just run ```main.py``` to start the server and access the API endpoints from localhost:
+```
+http://127.0.0.1:5000/
+http://127.0.0.1:5000/api/accounts
+```
+
 ### API
 
 | Route                               | Method | Purpose                                                    |
