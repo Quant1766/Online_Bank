@@ -40,6 +40,14 @@ This application doesn't have currency implemented. Funds are just floats.
 ### Transactions
 To make a new transaction you must first send JSON data to route: ```/api/transactions``` with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account. **Notice that minimum transaction amount is 1 €.**
 
+Accepted transaction types:
+
+```
+authorization
+presentment
+load (only used internally for /load money route)
+```
+
 Example data:
 ```
 {
