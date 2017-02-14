@@ -61,8 +61,30 @@ This application doesn't have currency implemented. Funds are just floats.
 * Get all transactions, single transaction
 * Post new transactions (types: authorization, presentment, load)
 
+### Accounts
+At route: ```/api/accounts``` you can see all created accounts. If you want to create new accounts just send this JSON data to the same endpoit as POST method:
+```
+{
+	'name': 'YourUniqueAccountName'
+}
+```
+
+Note that the account name is set as unique.
+
+### Load money
+You can load money to accounts with route: ```/api/load/<account_id>``` where account_id is your desired account id integer.
+Example data to send as PATCH method to the API:
+```
+{
+	'amount': 10.00
+}
+```
+
 ### Transactions
-To make a new transaction you must first send JSON data to route: ```/api/transactions``` with transactionType == 'authorization' to reserve funds from the cardholders account. Second transaction call to same route must: transactionType == 'presentment' that actually deduct the funds from the account. **Notice that minimum transaction amount is 1 €.**
+To make a new transaction you must first send JSON data to route: ```/api/transactions``` with transactionType ```authorization``` to reserve funds from the cardholders account.
+SenderID and ReceiverID must exist at the database!
+Second transaction type to the same route must be ```presentment```. This actually deducts the funds from the account.
+**Notice that minimum transaction amount is 1 €.**
 
 Accepted transaction types:
 
@@ -80,14 +102,6 @@ Example data:
 	'amount': 10.00,
 	'transactionType': 'authorization',
 	'transactionID': '1234ZORRO'
-}
-```
-### Load money
-You can load money to accounts with route: ```/api/load/<account_id>``` where account_id is your desired account id integer.
-Example data to send as PATCH method to the API:
-```
-{
-	'amount': 10.00
 }
 ```
 
