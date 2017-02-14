@@ -66,3 +66,37 @@ Example data to send as PATCH method to the API:
 	'amount': 10.00
 }
 ```
+
+### Transfer
+In this route: ```/api/transfers/account/<account_id>``` you can see dynamically calculated ledger and available balance. Ledger balance is the real balance of the account. Available balance is a balance that have transactions what are not yet presented (reserved).
+
+
+Example how will the data look:
+```
+{
+  "accountID": 1, 
+  "accountName": "UserName", 
+  "availableBalance": 90.0, 
+  "ledgerBalance": 90.0, 
+  "transfers": [
+    {
+      "accountID": 1, 
+      "accountName": "Sami", 
+      "amount": 100.0, 
+      "presented": true, 
+      "transactionID": "23b304d4-f2e3-11e6-923e-fc084a65e743", 
+      "transferDate": "Tue, 14 Feb 2017 18:17:15 GMT", 
+      "transferID": 1
+    }, 
+    {
+      "accountID": 1, 
+      "accountName": "Sami", 
+      "amount": -10.0, 
+      "presented": true, 
+      "transactionID": "123A", 
+      "transferDate": "Tue, 14 Feb 2017 18:47:56 GMT", 
+      "transferID": 3
+    }
+  ]
+}
+```
