@@ -13,4 +13,6 @@
 * Create new account, POST request /api/accounts
 * Get accounts/account with account id
 * Load money via /api/load/[account_id] route
-* Transfer money via /api/transfer route
+* Get all transfers, single transfer, all transfers for user
+* Get all transactions, single transaction
+* Post new transactions (types: authorization, presentment, load)
