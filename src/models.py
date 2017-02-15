@@ -1,6 +1,8 @@
 
 from datetime import datetime
 from peewee import *
+import base64
+import bcrypt
 
 db = SqliteDatabase('mydb.db', threadlocals=True)
 
@@ -11,6 +13,7 @@ class BaseModel(Model):
 
 class Accounts(BaseModel):
     name = CharField(unique=True)
+    password = CharField(max_length=1024)
     ledgerBalance = FloatField(default=0.0)
     availableBalance = FloatField(default=0.0)
     
@@ -21,6 +24,10 @@ class Accounts(BaseModel):
             'ledgerBalance': self.ledgerBalance,
             'availableBalance': self.availableBalance
         }
+    
+    def authenticate(self, plain_text_password):
+        pw_from_db = base64.b64decode(self.password)
+        return bcrypt.hashpw(str.encode(plain_text_password), pw_from_db) == pw_from_db
 
 class Transactions(BaseModel):
     transactionID = CharField()

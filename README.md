@@ -8,10 +8,12 @@ Python 3 Flask REST API web application (with peewee ORM + SQLite) to demonstrat
 * Python 3
 * Flask
 * peewee
+* bcrypt
 
 ```
 pip install peewee
 pip install Flask
+pip install bcrypt
 ```
 
 ### Starting the server
@@ -32,7 +34,7 @@ SQLite also doesn't have any authentication built-in. When you first start the d
 | ----------------------------------- |------  | ---------------------------------------------------------- |
 | /api/accounts                       | GET    | Get all users                                              |
 | /api/accounts/[account_id]          | GET    | Get single user with ID                                    |
-| /api/accounts                       | POST   | Post new user. Fields: "name": str                         |
+| /api/accounts                       | POST   | Post new user.                                             |
 | /api/load/[account_id]              | PATCH  | Load funds to user. Fields: "amount": float                |
 | /api/transactions                   | GET    | Get all transactions                                       |
 | /api/transactions/[transaction_id]  | GET    | Get single transaction with transaction id                 |
@@ -42,14 +44,12 @@ SQLite also doesn't have any authentication built-in. When you first start the d
 | /api/transfers/account/[account_id] | GET    | Get all transfers for single account with account id       |
 
 ### Concepts
-This application only accepts transactions between two accounts that exist in the Accounts table. Application doesn't have the Scheme implemented or batch job to transfer money to the scheme. There is no authentication either!
+This application only accepts transactions between two accounts that exist in the Accounts table. Application doesn't have the Scheme implemented or batch job to transfer money to the scheme.
 
+Basic authentication concept is implemented and user password hashing and authentication but not implemented at routes (only root route uses basic authentication)
 Bank takes 1 % fee for all transactions from the sender. So if sender (account 1) sends 10 € to account 2, bank takes 1 % of 10 € from the transfer amount and the account 2 only gets 9.9 € and the bank gets 0.1 €. Bank fee is defined as a global variable.
-
 You first must make two accounts and third account is the bank itself (account id 3)! You can change this bank id from the global variable.
-
 Minimum transfer amount is 1 €
-
 This application doesn't have currency implemented. Funds are just floats.
 
 ### Functionalities
@@ -60,12 +60,19 @@ This application doesn't have currency implemented. Funds are just floats.
 * Get all transfers, single transfer, all transfers for user
 * Get all transactions, single transaction
 * Post new transactions (types: authorization, presentment, load)
+* Basic authentication (only at / route)
+* Hash user passwords and authenticate them (framework created, not implemented at routes)
+
+### Authentication
+Basic authentication is implemented as a decorator function but only added to / root route. Account passwords are hashed and saved in the database by using the bcrypt library
+Accounts class have authenticate method where you can check if the provided password is valid for that account. This is not implemented in the routes, it's just a proof of concept.
 
 ### Accounts
 At route: ```/api/accounts``` you can see all created accounts. If you want to create new accounts just send this JSON data to the same endpoit as POST method:
 ```
 {
-	'name': 'YourUniqueAccountName'
+	'name': 'YourUniqueAccountName',
+  'password': 'password'
 }
 ```
 
