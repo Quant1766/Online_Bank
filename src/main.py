@@ -15,6 +15,10 @@ MINIMUM_TRANSFER = 1.00
  # valid transaction types
 TRANSACTION_TYPES = ['authorization', 'presentment', 'load']
 
+# basic authentication username and password
+BASIC_AUTH_UN = "admin"
+BASIC_AUTH_PW = "password"
+
 # helper and utility functions
 @app.before_request
 def before_request():
@@ -25,6 +29,23 @@ def before_request():
 def after_request(response):
     close_db()
     return response
+
+def basic_auth_check(username, password):
+    return username == BASIC_AUTH_UN and password == BASIC_AUTH_PW
+
+def basic_auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not basic_auth_check(auth.username, auth.password):
+            return Response(
+                'Not authorized to view this route',
+                401,
+                {'WWW-Authenticate': 'Basic realm="Login Required"'}
+            )
+
+        return f(*args, **kwargs)
+    return decorated
 
 def transaction_check(req, sender, receiver):
     """Transaction validity check."""
@@ -93,7 +114,7 @@ def api_get_accounts(account_id=None):
             accounts = Accounts.select()
             data = [account.to_dict() for account in accounts]
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
 
     return jsonify(data)
 
@@ -106,7 +127,7 @@ def api_post_account():
         )
 
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
     return "Successfully created a new account. ID: {}, Name: {}".format(res.id, res.name)
 
 @app.route('/api/load/<int:account_id>', methods=['PATCH'])
@@ -135,7 +156,7 @@ def api_load_money(account_id):
             presented=True
         )
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
     return "Successfully loaded {} € to account id: {}".format(req['amount'], account_id)
 
 @app.route('/api/transactions/<int:transaction_id>')
@@ -149,7 +170,7 @@ def api_get_transactions(transaction_id=None):
             transactions = Transactions.select()
             data = [transaction.to_dict() for transaction in transactions]
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
 
     return jsonify(data)
 
@@ -165,7 +186,7 @@ def api_get_transfers(transfer_id=None):
             transfers = Transfer.select()
             data = [transfer.to_dict() for transfer in transfers]
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
 
     return jsonify(data)
 
@@ -184,7 +205,7 @@ def api_get_account_transfers(account_id):
             available_balance += round(item['amount'], 2)
 
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
 
     return jsonify({
         'accountID': account_id,
@@ -234,7 +255,7 @@ def api_transactions():
             return "Transaction not valid", 403
 
     except Exception as error:
-        return "error: {}".format(error), 401
+        return "error: {}".format(error), 400
     return "success, id: {}".format(res.id)
 
 # Run Server
